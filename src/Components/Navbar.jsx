@@ -103,13 +103,13 @@ const Navbar = () => {
             <div className="flex space-x-4">
               <button
                 onClick={openLoginModal}
-                className="px-3 py-1 text-sm font-medium text-white bg-blue-500 rounded hover:bg-blue-600"
+                className="px-3 py-1 text-sm font-medium text-white rounded bg-primary hover:bg-yellow-500"
               >
                 Login
               </button>
               <button
                 onClick={openSignupModal}
-                className="px-3 py-1 text-sm font-medium text-blue-500 bg-white border border-blue-500 rounded hover:bg-blue-50"
+                className="px-3 py-1 text-sm font-medium bg-white border rounded text-primary border-primary hover:bg-blue-50"
               >
                 Sign Up
               </button>
