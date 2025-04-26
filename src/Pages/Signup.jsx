@@ -71,7 +71,7 @@ const Signup = ({ switchToLogin, closeModal, onSignupSuccess }) => {
         />
         <button
           type="submit"
-          className="py-2 text-white rounded bg-primary hover:bg-blue-600 disabled:opacity-50"
+          className="py-2 text-white rounded bg-primary hover:bg-yellow-500 disabled:opacity-50"
           disabled={isLoading}
         >
           {isLoading ? "Creating account..." : "Sign Up"}
