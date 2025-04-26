@@ -20,9 +20,12 @@ const Dashboard = () => {
     const fetchCourses = async () => {
       const token = localStorage.getItem("token");
       try {
-        const res = await fetch("http://localhost:5000/courses/myCourses", {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetch(
+          "https://academic-planner-backend.onrender.com/courses/myCourses",
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         if (!res.ok) throw new Error("Failed to fetch courses");
         setCourses(await res.json());
       } catch (err) {
