@@ -15,7 +15,7 @@ const Suggestion = () => {
     setIsLoading(true);
 
     try {
-      const res = await fetch("http://localhost:5001/chat", {
+      const res = await fetch("https://navin82005.pythonanywhere.com/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message }),

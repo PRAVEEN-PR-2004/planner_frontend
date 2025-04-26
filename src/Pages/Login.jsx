@@ -13,10 +13,13 @@ const Login = ({ switchToSignup, closeModal, onLoginSuccess }) => {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await axios.post("http://localhost:5000/api/login", {
-        email: form.email.trim(),
-        password: form.password.trim(),
-      });
+      const response = await axios.post(
+        "https://academic-planner-backend.onrender.com/api/login",
+        {
+          email: form.email.trim(),
+          password: form.password.trim(),
+        }
+      );
 
       localStorage.setItem("token", response.data.token);
 

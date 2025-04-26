@@ -32,7 +32,7 @@ const AddCourses = () => {
       }
 
       const response = await axios.post(
-        "http://localhost:5000/courses/createCourse",
+        "https://academic-planner-backend.onrender.com/courses/createCourse",
         form,
         {
           headers: {

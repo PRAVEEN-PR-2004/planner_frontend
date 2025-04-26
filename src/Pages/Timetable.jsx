@@ -20,7 +20,7 @@ const Timetable = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
     setIsLoading(true);
-    fetch("http://localhost:5000/courses/myCourses", {
+    fetch("https://academic-planner-backend.onrender.com/courses/myCourses", {
       headers: { Authorization: `Bearer ${token}` },
     })
       .then((r) => {
