@@ -1,285 +1,388 @@
 import React, { useEffect, useState } from "react";
-import { Calendar, dateFnsLocalizer } from "react-big-calendar";
-import "react-big-calendar/lib/css/react-big-calendar.css";
-import format from "date-fns/format";
-import parse from "date-fns/parse";
-import startOfWeek from "date-fns/startOfWeek";
-import getDay from "date-fns/getDay";
-import enUS from "date-fns/locale/en-US";
+import { useNavigate } from "react-router-dom";
 import {
-  FaCheckCircle,
-  FaExclamationCircle,
-  FaCalendarAlt,
-  FaBell,
-} from "react-icons/fa";
-import { differenceInDays, isAfter, isBefore } from "date-fns";
+  BookOpen,
+  Layers,
+  ClipboardList,
+  CalendarDays,
+  Plus,
+  Trash2,
+  Check,
+  ChevronRight,
+} from "lucide-react";
 
-const locales = { "en-US": enUS };
-const localizer = dateFnsLocalizer({
-  format,
-  parse,
-  startOfWeek,
-  getDay,
-  locales,
-});
-
-const CourseCalendar = () => {
-  const [events, setEvents] = useState([]);
+const Courses = () => {
+  const [courses, setCourses] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [showNotification, setShowNotification] = useState(false);
-  const [upcomingDeadlines, setUpcomingDeadlines] = useState([]);
+  const navigate = useNavigate();
 
+  // Fetch all courses
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    setIsLoading(true);
-    fetch("https://academic-planner-backend.onrender.com/courses/myCourses", {
-      headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error(res.statusText);
-        return res.json();
-      })
-      .then((data) => {
-        const evts = data
-          .filter((c) => c.deadline)
-          .map((c) => ({
-            title: (
-              <div
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  flexWrap: "wrap",
-                  justifyContent: "center",
-                  fontSize: "0.75rem",
-                }}
-              >
-                {c.status ? (
-                  <FaCheckCircle
-                    color="#16a34a"
-                    style={{
-                      minWidth: "14px",
-                      minHeight: "14px",
-                      flexShrink: 0,
-                    }}
-                  />
-                ) : (
-                  <FaExclamationCircle
-                    color="#dc2626"
-                    style={{
-                      minWidth: "14px",
-                      minHeight: "14px",
-                      flexShrink: 0,
-                    }}
-                  />
-                )}
-                <span
-                  style={{
-                    wordBreak: "break-word",
-                    textAlign: "center",
-                  }}
-                >
-                  {c.subjectName}
-                </span>
-              </div>
-            ),
-            start: new Date(c.deadline),
-            end: new Date(c.deadline),
-            allDay: true,
-            status: c.status,
-            courseData: c, // Store the original course data
-          }));
+    const fetchCourses = async () => {
+      const token = localStorage.getItem("token");
+      setIsLoading(true);
+      try {
+        const res = await fetch(
+          "https://academic-planner-backend.onrender.com/courses/myCourses",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
 
-        setEvents(evts);
-        checkUpcomingDeadlines(evts);
+        if (!res.ok) {
+          throw new Error("Failed to fetch courses");
+        }
+
+        const data = await res.json();
+        setCourses(data);
+      } catch (error) {
+        console.error("Error fetching courses:", error.message);
+      } finally {
         setIsLoading(false);
-      })
-      .catch((err) => {
-        console.error("Fetch error:", err);
-        setIsLoading(false);
-      });
+      }
+    };
+
+    fetchCourses();
   }, []);
 
-  // Check for upcoming deadlines and show notification
-  const checkUpcomingDeadlines = (events) => {
-    const now = new Date();
-    const upcoming = events
-      .filter(
-        (event) =>
-          !event.status && // Only upcoming (not completed)
-          isAfter(new Date(event.start), now) && // Deadline is in the future
-          differenceInDays(new Date(event.start), now) <= 7 // Within 7 days
-      )
-      .map((event) => ({
-        name: event.courseData.subjectName,
-        date: format(new Date(event.start), "MMM dd, yyyy"),
-        daysLeft: differenceInDays(new Date(event.start), now),
-      }));
+  // Delete a course
+  const deleteCourse = async (courseId) => {
+    const token = localStorage.getItem("token");
+    try {
+      const res = await fetch(
+        `https://academic-planner-backend.onrender.com/courses/courses/${courseId}`,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    if (upcoming.length > 0) {
-      setUpcomingDeadlines(upcoming);
-      setShowNotification(true);
+      if (!res.ok) {
+        throw new Error("Failed to delete course");
+      }
 
-      // Auto-hide notification after 10 seconds
-      setTimeout(() => {
-        setShowNotification(false);
-      }, 10000);
+      setCourses((prevCourses) =>
+        prevCourses.filter((course) => course._id !== courseId)
+      );
+    } catch (error) {
+      console.error("Error deleting course:", error.message);
     }
   };
 
-  const eventStyleGetter = (event) => ({
-    style: {
-      backgroundColor: event.status ? "#f0fdf4" : "#fef2f2",
-      color: "inherit",
-      fontWeight: "500",
-      fontSize: "0.85rem",
-      display: "flex",
-      alignItems: "center",
-      border: "none",
-      borderRadius: "6px",
-      padding: "2px 4px",
-      boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
-    },
-  });
+  // Mark course as completed manually
+  const markCourseAsCompleted = async (courseId) => {
+    const token = localStorage.getItem("token");
 
-  const dayPropGetter = (date) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    try {
+      const res = await fetch(
+        `https://academic-planner-backend.onrender.com/courses/courses/${courseId}/complete`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
-    return {
-      style: {
-        backgroundColor:
-          date.toDateString() === today.toDateString() ? "#f5f3ff" : "white",
-        borderRight: "1px solid #eee",
-        borderBottom: "1px solid #eee",
-      },
-    };
+      if (!res.ok) {
+        throw new Error("Failed to update course status");
+      }
+
+      const updatedCourse = await res.json();
+
+      setCourses((prevCourses) =>
+        prevCourses.map((course) =>
+          course._id === updatedCourse._id ? updatedCourse : course
+        )
+      );
+    } catch (error) {
+      console.error("Error updating course status:", error.message);
+    }
+  };
+
+  // Decrease chapters by 1
+  const decreaseChapter = async (courseId) => {
+    const token = localStorage.getItem("token");
+
+    try {
+      // First decrease the chapter count
+      const decreaseRes = await fetch(
+        `https://academic-planner-backend.onrender.com/courses/courses/${courseId}/decreaseChapter`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      if (!decreaseRes.ok) {
+        throw new Error("Failed to decrease chapter");
+      }
+
+      const updatedCourse = await decreaseRes.json();
+
+      // Check if this was the last chapter
+      if (updatedCourse.pendingChapters === 0) {
+        // Automatically mark as completed
+        const completeRes = await fetch(
+          `https://academic-planner-backend.onrender.com/courses/courses/${courseId}/complete`,
+          {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+
+        if (!completeRes.ok) {
+          throw new Error("Failed to mark course as completed");
+        }
+
+        const completedCourse = await completeRes.json();
+
+        setCourses((prevCourses) =>
+          prevCourses.map((course) =>
+            course._id === completedCourse._id ? completedCourse : course
+          )
+        );
+      } else {
+        setCourses((prevCourses) =>
+          prevCourses.map((course) =>
+            course._id === updatedCourse._id ? updatedCourse : course
+          )
+        );
+      }
+    } catch (error) {
+      console.error("Error decreasing chapter:", error.message);
+    }
   };
 
   return (
-    <div className="min-h-screen px-4 py-8 pt-16 bg-gradient-to-br from-gray-50 to-gray-100">
-      {/* Notification Bell */}
-      <div className="fixed z-50 top-4 right-4">
-        <button
-          onClick={() => setShowNotification(!showNotification)}
-          className="relative p-3 text-white bg-indigo-600 rounded-full shadow-lg hover:bg-indigo-700 focus:outline-none"
-        >
-          <FaBell className="text-xl" />
-          {upcomingDeadlines.length > 0 && (
-            <span className="absolute top-0 right-0 flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500 rounded-full">
-              {upcomingDeadlines.length}
-            </span>
-          )}
-        </button>
+    <div className="min-h-screen px-4 pb-16 bg-gradient-to-b from-gray-50 to-gray-100 pt-28 sm:px-6 lg:px-8">
+      <div className="mx-auto max-w-7xl">
+        <div className="flex flex-col items-center justify-between gap-6 mb-12 md:flex-row">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 font-display">
+              My Learning Journey
+            </h1>
+            <p className="mt-2 text-gray-600">
+              Track and manage all your courses in one place
+            </p>
+          </div>
 
-        {/* Notification Dropdown */}
-        {showNotification && (
-          <div className="absolute right-0 w-64 mt-2 overflow-hidden bg-white rounded-lg shadow-xl top-14">
-            <div className="p-4 bg-indigo-600">
-              <h3 className="font-semibold text-white">Upcoming Deadlines</h3>
-            </div>
-            <div className="divide-y divide-gray-200">
-              {upcomingDeadlines.length > 0 ? (
-                upcomingDeadlines.map((deadline, index) => (
-                  <div key={index} className="p-3">
-                    <p className="font-medium text-gray-800">{deadline.name}</p>
-                    <p className="text-sm text-gray-600">
-                      Due: {deadline.date} ({deadline.daysLeft} day
-                      {deadline.daysLeft !== 1 ? "s" : ""} left)
-                    </p>
-                  </div>
-                ))
-              ) : (
-                <div className="p-4 text-center text-gray-600">
-                  No upcoming deadlines
-                </div>
-              )}
-            </div>
-            <div className="p-2 text-center bg-gray-50">
-              <button
-                onClick={() => setShowNotification(false)}
-                className="text-sm text-indigo-600 hover:text-indigo-800"
+          <button
+            onClick={() => navigate("/courses/addcourses")}
+            className="items-center hidden gap-2 px-6 py-3 text-sm font-medium text-white transition-all duration-200 rounded-lg shadow-lg md:inline-flex bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            <Plus className="w-5 h-5" />
+            Add New Course
+          </button>
+        </div>
+
+        {/* Floating Action Button for Mobile */}
+        <div className="fixed bottom-8 right-8 lg:hidden">
+          <button
+            onClick={() => navigate("/courses/addcourses")}
+            className="flex items-center justify-center p-4 text-white rounded-full shadow-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+          >
+            <Plus className="w-6 h-6" />
+          </button>
+        </div>
+
+        {isLoading ? (
+          <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            {[...Array(3)].map((_, i) => (
+              <div
+                key={i}
+                className="h-64 bg-white rounded-lg shadow-sm animate-pulse"
               >
-                Close
-              </button>
+                <div className="p-6 space-y-4">
+                  <div className="w-3/4 h-6 bg-gray-200 rounded"></div>
+                  <div className="w-1/2 h-4 bg-gray-200 rounded"></div>
+                  <div className="space-y-2">
+                    <div className="h-4 bg-gray-200 rounded"></div>
+                    <div className="w-5/6 h-4 bg-gray-200 rounded"></div>
+                    <div className="w-2/3 h-4 bg-gray-200 rounded"></div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : courses.length > 0 ? (
+          <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+            {courses.map((course) => (
+              <div
+                key={course._id}
+                className={`flex flex-col overflow-hidden transition-all duration-300 bg-white border border-gray-200 rounded-xl shadow-sm hover:shadow-md ${
+                  course.status ? "ring-1 ring-green-500/10" : ""
+                }`}
+              >
+                <div className="p-6">
+                  <div className="flex items-start justify-between mb-4">
+                    <div>
+                      <h2 className="text-xl font-bold text-gray-900 line-clamp-2">
+                        {course.courseName}
+                      </h2>
+                      <p className="mt-1 text-sm text-gray-500">
+                        {course.subjectName}
+                      </p>
+                    </div>
+                    {course.status && (
+                      <span className="inline-flex items-center px-3 py-1 text-xs font-semibold text-green-800 bg-green-100 rounded-full">
+                        <Check className="w-3 h-3 mr-1" />
+                        Completed
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="space-y-4">
+                    {/* Progress Section */}
+                    <div>
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-sm font-medium text-gray-700">
+                          Progress
+                        </span>
+                        <span className="text-sm font-semibold text-indigo-600">
+                          {course.chapters - course.pendingChapters}/
+                          {course.chapters} chapters
+                        </span>
+                      </div>
+                      <div className="w-full h-2.5 bg-gray-200 rounded-full">
+                        <div
+                          className="h-2.5 bg-gradient-to-r from-indigo-500 to-blue-500 rounded-full"
+                          style={{
+                            width: `${
+                              ((course.chapters - course.pendingChapters) /
+                                course.chapters) *
+                              100
+                            }%`,
+                          }}
+                        ></div>
+                      </div>
+                    </div>
+
+                    {/* Task Section */}
+                    <div className="p-4 rounded-lg bg-gray-50">
+                      <div className="flex items-start gap-3">
+                        <ClipboardList className="flex-shrink-0 w-5 h-5 mt-0.5 text-purple-600" />
+                        <div>
+                          <p className="text-sm font-medium text-gray-500">
+                            Current Task
+                          </p>
+                          <p className="text-gray-800 line-clamp-2">
+                            {course.task}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Deadline Section */}
+                    <div className="flex items-center justify-between p-3 rounded-lg bg-gray-50">
+                      <div className="flex items-center gap-3">
+                        <CalendarDays className="flex-shrink-0 w-5 h-5 text-amber-600" />
+                        <div>
+                          <p className="text-sm font-medium text-gray-500">
+                            Deadline
+                          </p>
+                          <p className="text-gray-800">
+                            {new Date(course.deadline).toLocaleDateString(
+                              "en-US",
+                              {
+                                year: "numeric",
+                                month: "short",
+                                day: "numeric",
+                              }
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                      <ChevronRight className="w-5 h-5 text-gray-400" />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="p-4 border-t border-gray-100 bg-gray-50/50">
+                  <div className="grid grid-cols-2 gap-3">
+                    {course.pendingChapters > 0 ? (
+                      <button
+                        onClick={() => decreaseChapter(course._id)}
+                        className="flex items-center justify-center gap-1 px-4 py-2 text-sm font-medium text-white transition-all duration-200 bg-indigo-600 rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1"
+                      >
+                        <Check className="w-4 h-4" />
+                        Complete Chapter
+                      </button>
+                    ) : (
+                      <button
+                        className="flex items-center justify-center gap-1 px-4 py-2 text-sm font-medium text-gray-400 bg-gray-200 rounded-lg cursor-not-allowed"
+                        disabled
+                      >
+                        <Check className="w-4 h-4" />
+                        All Done
+                      </button>
+                    )}
+
+                    {!course.status ? (
+                      <button
+                        onClick={() => markCourseAsCompleted(course._id)}
+                        className="flex items-center justify-center gap-1 px-4 py-2 text-sm font-medium text-white transition-all duration-200 bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1"
+                      >
+                        <Check className="w-4 h-4" />
+                        Mark Complete
+                      </button>
+                    ) : (
+                      <button
+                        className="flex items-center justify-center gap-1 px-4 py-2 text-sm font-medium text-gray-400 bg-gray-200 rounded-lg cursor-not-allowed"
+                        disabled
+                      >
+                        <Check className="w-4 h-4" />
+                        Completed
+                      </button>
+                    )}
+
+                    <button
+                      onClick={() => deleteCourse(course._id)}
+                      className="flex items-center justify-center col-span-2 gap-1 px-4 py-2 text-sm font-medium text-white transition-all duration-200 bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      Delete Course
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="flex flex-col items-center justify-center py-16 text-center bg-white shadow-sm rounded-xl">
+            <div className="p-5 mb-6 bg-indigo-100 rounded-full">
+              <BookOpen className="w-12 h-12 text-indigo-600" />
             </div>
+            <h3 className="mb-3 text-2xl font-bold text-gray-900">
+              No courses yet
+            </h3>
+            <p className="max-w-md mb-8 text-gray-600">
+              Start your learning journey by adding your first course. Track
+              progress, set deadlines, and achieve your goals.
+            </p>
+            <button
+              onClick={() => navigate("/courses/addcourses")}
+              className="flex items-center gap-2 px-8 py-3 text-sm font-medium text-white transition-all duration-200 rounded-lg shadow-lg bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            >
+              <Plus className="w-5 h-5" />
+              Add Your First Course
+            </button>
           </div>
         )}
-      </div>
-
-      <div className="max-w-6xl mx-auto">
-        <div className="flex flex-col items-center mb-8">
-          <div className="flex items-center justify-center w-16 h-16 mb-4 text-indigo-600 bg-indigo-100 rounded-full">
-            <FaCalendarAlt className="text-2xl" />
-          </div>
-          <h1 className="text-3xl font-bold text-center text-gray-800 font-display">
-            Deadlines Calendar
-          </h1>
-          <p className="mt-2 text-gray-600">
-            Track all your course deadlines in one place
-          </p>
-        </div>
-
-        <div className="flex justify-center mb-6">
-          <div className="flex items-center gap-6 p-3 bg-white rounded-lg shadow-sm">
-            <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-green-50">
-              <FaCheckCircle className="text-green-600" />
-              <span className="text-sm font-medium text-gray-700">
-                Completed
-              </span>
-            </div>
-            <div className="flex items-center gap-2 px-3 py-1 rounded-md bg-red-50">
-              <FaExclamationCircle className="text-red-600" />
-              <span className="text-sm font-medium text-gray-700">
-                Upcoming
-              </span>
-            </div>
-          </div>
-        </div>
-
-        <div className="overflow-hidden bg-white shadow-md rounded-xl">
-          {isLoading ? (
-            <div className="flex items-center justify-center h-96">
-              <div className="w-8 h-8 border-4 border-indigo-500 rounded-full border-t-transparent animate-spin"></div>
-            </div>
-          ) : (
-            <div style={{ height: "70vh" }}>
-              <Calendar
-                localizer={localizer}
-                events={events}
-                startAccessor="start"
-                endAccessor="end"
-                views={["month"]}
-                defaultView="month"
-                date={new Date(2025, 3, 1)}
-                toolbar={true}
-                eventPropGetter={eventStyleGetter}
-                dayPropGetter={dayPropGetter}
-                popup
-                components={{
-                  toolbar: (props) => (
-                    <div className="flex items-center justify-between p-4 border-b">
-                      <button
-                        onClick={() => props.onNavigate("PREV")}
-                        className="p-2 text-gray-600 rounded-lg hover:bg-gray-100"
-                      ></button>
-                      <span className="text-lg font-semibold text-gray-800">
-                        {format(props.date, "MMMM yyyy")}
-                      </span>
-                      <button
-                        onClick={() => props.onNavigate("NEXT")}
-                        className="p-2 text-gray-600 rounded-lg hover:bg-gray-100"
-                      ></button>
-                    </div>
-                  ),
-                }}
-              />
-            </div>
-          )}
-        </div>
       </div>
     </div>
   );
 };
 
-export default CourseCalendar;
+export default Courses;

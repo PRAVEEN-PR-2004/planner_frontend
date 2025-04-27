@@ -10,7 +10,9 @@ import {
   FaCheckCircle,
   FaExclamationCircle,
   FaCalendarAlt,
+  FaBell,
 } from "react-icons/fa";
+import { differenceInDays, isAfter, isBefore } from "date-fns";
 
 const locales = { "en-US": enUS };
 const localizer = dateFnsLocalizer({
@@ -24,6 +26,8 @@ const localizer = dateFnsLocalizer({
 const CourseCalendar = () => {
   const [events, setEvents] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showNotification, setShowNotification] = useState(false);
+  const [upcomingDeadlines, setUpcomingDeadlines] = useState([]);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -83,8 +87,11 @@ const CourseCalendar = () => {
             end: new Date(c.deadline),
             allDay: true,
             status: c.status,
+            courseData: c, // Store the original course data
           }));
+
         setEvents(evts);
+        checkUpcomingDeadlines(evts);
         setIsLoading(false);
       })
       .catch((err) => {
@@ -92,6 +99,33 @@ const CourseCalendar = () => {
         setIsLoading(false);
       });
   }, []);
+
+  // Check for upcoming deadlines and show notification
+  const checkUpcomingDeadlines = (events) => {
+    const now = new Date();
+    const upcoming = events
+      .filter(
+        (event) =>
+          !event.status && // Only upcoming (not completed)
+          isAfter(new Date(event.start), now) && // Deadline is in the future
+          differenceInDays(new Date(event.start), now) <= 7 // Within 7 days
+      )
+      .map((event) => ({
+        name: event.courseData.subjectName,
+        date: format(new Date(event.start), "MMM dd, yyyy"),
+        daysLeft: differenceInDays(new Date(event.start), now),
+      }));
+
+    if (upcoming.length > 0) {
+      setUpcomingDeadlines(upcoming);
+      setShowNotification(true);
+
+      // Auto-hide notification after 10 seconds
+      setTimeout(() => {
+        setShowNotification(false);
+      }, 10000);
+    }
+  };
 
   const eventStyleGetter = (event) => ({
     style: {
@@ -124,6 +158,55 @@ const CourseCalendar = () => {
 
   return (
     <div className="min-h-screen px-4 py-8 pt-16 bg-gradient-to-br from-gray-50 to-gray-100">
+      {/* Notification Bell */}
+      <div className="fixed z-50 top-4 right-4">
+        <button
+          onClick={() => setShowNotification(!showNotification)}
+          className="relative p-3 text-white bg-indigo-600 rounded-full shadow-lg hover:bg-indigo-700 focus:outline-none"
+        >
+          <FaBell className="text-xl" />
+          {upcomingDeadlines.length > 0 && (
+            <span className="absolute top-0 right-0 flex items-center justify-center w-6 h-6 text-xs font-bold text-white bg-red-500 rounded-full">
+              {upcomingDeadlines.length}
+            </span>
+          )}
+        </button>
+
+        {/* Notification Dropdown */}
+        {showNotification && (
+          <div className="absolute right-0 w-64 mt-2 overflow-hidden bg-white rounded-lg shadow-xl top-14">
+            <div className="p-4 bg-indigo-600">
+              <h3 className="font-semibold text-white">Upcoming Deadlines</h3>
+            </div>
+            <div className="divide-y divide-gray-200">
+              {upcomingDeadlines.length > 0 ? (
+                upcomingDeadlines.map((deadline, index) => (
+                  <div key={index} className="p-3">
+                    <p className="font-medium text-gray-800">{deadline.name}</p>
+                    <p className="text-sm text-gray-600">
+                      Due: {deadline.date} ({deadline.daysLeft} day
+                      {deadline.daysLeft !== 1 ? "s" : ""} left)
+                    </p>
+                  </div>
+                ))
+              ) : (
+                <div className="p-4 text-center text-gray-600">
+                  No upcoming deadlines
+                </div>
+              )}
+            </div>
+            <div className="p-2 text-center bg-gray-50">
+              <button
+                onClick={() => setShowNotification(false)}
+                className="text-sm text-indigo-600 hover:text-indigo-800"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col items-center mb-8">
           <div className="flex items-center justify-center w-16 h-16 mb-4 text-indigo-600 bg-indigo-100 rounded-full">
