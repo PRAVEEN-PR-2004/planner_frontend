@@ -39,6 +39,9 @@ const Timetable = () => {
     const completed = courses.filter((c) => c.status);
     const blocks = [];
 
+    // Group events by hour to prevent overlapping
+    const hourGroups = {};
+
     pending.forEach((c, i) => {
       const startHour = 8 + i * 2;
       if (startHour + 2 > 20) return;
@@ -56,7 +59,13 @@ const Timetable = () => {
         startHour + 2,
         0
       );
-      blocks.push({
+
+      const key = `${startHour}`;
+      if (!hourGroups[key]) {
+        hourGroups[key] = [];
+      }
+
+      hourGroups[key].push({
         title: `${c.courseName}`,
         subject: c.subjectName,
         start,
@@ -68,7 +77,12 @@ const Timetable = () => {
     });
 
     if (completed.length) {
-      blocks.push({
+      // Add review session at 5 PM
+      const reviewKey = "17";
+      if (!hourGroups[reviewKey]) {
+        hourGroups[reviewKey] = [];
+      }
+      hourGroups[reviewKey].push({
         title: "Review Session",
         subject: completed.map((c) => c.courseName).join(", "),
         start: new Date(
@@ -89,7 +103,12 @@ const Timetable = () => {
         type: "review",
       });
 
-      blocks.push({
+      // Add revision time at 7 PM
+      const revisionKey = "19";
+      if (!hourGroups[revisionKey]) {
+        hourGroups[revisionKey] = [];
+      }
+      hourGroups[revisionKey].push({
         title: "Revision Time",
         subject: completed.map((c) => c.courseName).join(", "),
         start: new Date(
@@ -111,7 +130,12 @@ const Timetable = () => {
       });
     }
 
-    setEvents(blocks.sort((a, b) => a.start - b.start));
+    // Flatten the hour groups and sort by start time
+    const sortedEvents = Object.values(hourGroups)
+      .flat()
+      .sort((a, b) => a.start - b.start);
+
+    setEvents(sortedEvents);
   }, [courses]);
 
   const formattedDate = format(today, "EEEE, MMMM d, yyyy");
@@ -157,6 +181,38 @@ const Timetable = () => {
   };
 
   const completedCourses = courses.filter((c) => c.status);
+
+  // Function to calculate event width and position when there are multiple events in the same hour
+  const getEventStyle = (event, index, hourGroup) => {
+    const totalEventsInHour = hourGroup.length;
+    const widthPercentage = 100 / totalEventsInHour;
+    const leftPosition = index * widthPercentage;
+
+    return {
+      top: `${
+        (event.start.getHours() - 8) * 60 + (event.start.getMinutes() / 60) * 60
+      }px`,
+      height: getTimeSlotHeight(event.start, event.end),
+      width: `${widthPercentage}%`,
+      left: `${leftPosition}%`,
+      position: "absolute",
+    };
+  };
+
+  // Group events by hour for rendering
+  const groupEventsByHour = () => {
+    const grouped = {};
+    events.forEach((event) => {
+      const hour = event.start.getHours();
+      if (!grouped[hour]) {
+        grouped[hour] = [];
+      }
+      grouped[hour].push(event);
+    });
+    return grouped;
+  };
+
+  const hourGroups = groupEventsByHour();
 
   return (
     <div className="max-w-6xl min-h-screen p-3 pt-20 mx-auto mt-3 sm:p-4 sm:pt-24 lg:pt-16">
@@ -277,54 +333,59 @@ const Timetable = () => {
           </div>
 
           {/* Events */}
-          <div className="relative" style={{ marginLeft: "50px" }}>
-            {events.map((event, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.1 }}
-                className={`absolute w-full rounded-md sm:rounded-lg p-2 sm:p-3 md:p-4 mb-1 sm:mb-2 border ${getEventColor(
-                  event.type
-                )} ${getBorderColor(
-                  event.type
-                )} border-l-4 transition-all duration-200 cursor-pointer group`}
-                style={{
-                  top: `${
-                    (event.start.getHours() - 8) * 60 +
-                    (event.start.getMinutes() / 60) * 60
-                  }px`,
-                  height: getTimeSlotHeight(event.start, event.end),
-                }}
+          <div
+            className="relative"
+            style={{ marginLeft: "50px", height: "780px" }}
+          >
+            {Object.entries(hourGroups).map(([hour, hourEvents]) => (
+              <div
+                key={hour}
+                className="relative w-full"
+                style={{ height: "60px" }}
               >
-                <div className="flex items-start h-full">
-                  <div className="flex items-center justify-center p-1 mr-2 transition-transform bg-white rounded-full shadow-xs sm:p-2 sm:mr-3 group-hover:scale-110">
-                    {getEventIcon(event.type)}
-                  </div>
-                  <div className="flex flex-col justify-between w-full h-full overflow-hidden">
-                    <div className="overflow-hidden">
-                      <h3 className="text-sm font-semibold truncate sm:text-base text-slate-800">
-                        {event.title}
-                      </h3>
-                      <p className="text-xs truncate sm:text-sm text-slate-600">
-                        {event.subject}
-                      </p>
+                {hourEvents.map((event, index) => (
+                  <motion.div
+                    key={`${hour}-${index}`}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    className={`absolute rounded-md sm:rounded-lg p-2 sm:p-3 md:p-4 mb-1 sm:mb-2 border ${getEventColor(
+                      event.type
+                    )} ${getBorderColor(
+                      event.type
+                    )} border-l-4 transition-all duration-200 cursor-pointer group`}
+                    style={getEventStyle(event, index, hourEvents)}
+                  >
+                    <div className="flex items-start h-full">
+                      <div className="flex items-center justify-center p-1 mr-2 transition-transform bg-white rounded-full shadow-xs sm:p-2 sm:mr-3 group-hover:scale-110">
+                        {getEventIcon(event.type)}
+                      </div>
+                      <div className="flex flex-col justify-between w-full h-full overflow-hidden">
+                        <div className="overflow-hidden">
+                          <h3 className="text-sm font-semibold truncate sm:text-base text-slate-800">
+                            {event.title}
+                          </h3>
+                          <p className="text-xs truncate sm:text-sm text-slate-600">
+                            {event.subject}
+                          </p>
+                        </div>
+                        <div className="flex items-center justify-between mt-1 sm:mt-2">
+                          <p className="text-xs font-medium text-slate-500 whitespace-nowrap">
+                            {format(event.start, "h:mm a")} -{" "}
+                            {format(event.end, "h:mm a")}
+                          </p>
+                          {event.type === "study" && !event.status && (
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium bg-amber-100 text-amber-800">
+                              Pending
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                      <ChevronRight className="flex-shrink-0 w-3 h-3 ml-1 transition-all sm:w-4 sm:h-4 sm:ml-2 text-slate-400 group-hover:text-slate-600 group-hover:translate-x-1" />
                     </div>
-                    <div className="flex items-center justify-between mt-1 sm:mt-2">
-                      <p className="text-xs font-medium text-slate-500 whitespace-nowrap">
-                        {format(event.start, "h:mm a")} -{" "}
-                        {format(event.end, "h:mm a")}
-                      </p>
-                      {event.type === "study" && !event.status && (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] sm:text-xs font-medium bg-amber-100 text-amber-800">
-                          Pending
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                  <ChevronRight className="flex-shrink-0 w-3 h-3 ml-1 transition-all sm:w-4 sm:h-4 sm:ml-2 text-slate-400 group-hover:text-slate-600 group-hover:translate-x-1" />
-                </div>
-              </motion.div>
+                  </motion.div>
+                ))}
+              </div>
             ))}
           </div>
         </div>
