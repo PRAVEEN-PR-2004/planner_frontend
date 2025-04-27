@@ -183,7 +183,7 @@ const Navbar = () => {
                     openLoginModal();
                     setIsOpen(false);
                   }}
-                  className="w-full px-3 py-2 text-sm font-medium text-center text-white bg-blue-500 rounded hover:bg-blue-600"
+                  className="w-full px-3 py-2 text-sm font-medium text-center text-white rounded bg-primary hover:bg-yellow-600"
                 >
                   Login
                 </button>
@@ -192,7 +192,7 @@ const Navbar = () => {
                     openSignupModal();
                     setIsOpen(false);
                   }}
-                  className="w-full px-3 py-2 text-sm font-medium text-center text-blue-500 bg-white border border-blue-500 rounded hover:bg-blue-50"
+                  className="w-full px-3 py-2 text-sm font-medium text-center bg-white border border-yellow-500 rounded text-primary hover:bg-blue-50"
                 >
                   Sign Up
                 </button>
