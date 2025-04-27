@@ -395,7 +395,7 @@ const Timetable = () => {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.4 }}
-        className="flex flex-wrap justify-center gap-2 mt-6 sm:gap-3 md:gap-4 sm:mt-8"
+        className="flex flex-wrap justify-center gap-2 py-5 mt-6 sm:gap-3 md:gap-4 sm:mt-8"
       >
         <div className="flex items-center px-3 py-1 bg-white border rounded-md shadow-xs sm:px-4 sm:py-2 sm:rounded-lg border-slate-200">
           <div className="w-2 h-2 mr-1 rounded-full sm:w-3 sm:h-3 sm:mr-2 bg-amber-500"></div>

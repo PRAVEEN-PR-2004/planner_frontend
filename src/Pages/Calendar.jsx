@@ -159,7 +159,7 @@ const CourseCalendar = () => {
   return (
     <div className="min-h-screen px-4 py-8 pt-16 bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Notification Bell */}
-      <div className="fixed z-50 top-8 right-4 ">
+      <div className="fixed z-50 top-12 right-4 ">
         <button
           onClick={() => setShowNotification(!showNotification)}
           className="relative p-3 text-white rounded-full shadow-lg bg-primary hover:bg-yellow-500 focus:outline-none"
