@@ -361,8 +361,8 @@ const Courses = () => {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-16 text-center bg-white shadow-sm rounded-xl">
-            <div className="p-5 mb-6 bg-indigo-100 rounded-full">
-              <BookOpen className="w-12 h-12 text-indigo-600" />
+            <div className="p-5 mb-6 bg-yellow-100 rounded-full">
+              <BookOpen className="w-12 h-12 text-primary" />
             </div>
             <h3 className="mb-3 text-2xl font-bold text-gray-900">
               No courses yet
