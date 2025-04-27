@@ -174,8 +174,8 @@ const CourseCalendar = () => {
 
         {/* Notification Dropdown */}
         {showNotification && (
-          <div className="absolute right-0 w-64 mt-2 overflow-hidden bg-white rounded-lg shadow-xl top-14">
-            <div className="p-4 bg-indigo-600">
+          <div className="absolute right-0 w-64 mt-8 overflow-hidden bg-white rounded-lg shadow-xl top-14">
+            <div className="p-4 bg-primary">
               <h3 className="font-semibold text-white">Upcoming Deadlines</h3>
             </div>
             <div className="divide-y divide-gray-200">
