@@ -69,10 +69,10 @@ const Suggestion = () => {
         >
           {chatHistory.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
-              <div className="p-6 mb-4 rounded-full bg-blue-50">
+              <div className="p-6 mb-4 rounded-full bg-yellow-50">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
-                  className="w-12 h-12 text-blue-500"
+                  className="w-12 h-12 text-primary"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
@@ -104,13 +104,13 @@ const Suggestion = () => {
                 <div
                   className={`relative px-5 py-3 max-w-[85%] lg:max-w-[75%] text-sm rounded-2xl shadow-sm whitespace-pre-wrap ${
                     msg.type === "user"
-                      ? "bg-blue-600 text-white rounded-br-none"
+                      ? "bg-primary text-white rounded-br-none"
                       : "bg-white text-gray-800 rounded-bl-none border border-gray-100"
                   }`}
                 >
                   {msg.text}
                   {msg.type === "user" && (
-                    <span className="absolute bottom-0 right-0 w-3 h-3 -mr-1 transform rotate-45 translate-x-1/2 translate-y-1/2 bg-blue-600"></span>
+                    <span className="absolute bottom-0 right-0 w-3 h-3 -mr-1 transform rotate-45 translate-x-1/2 translate-y-1/2 bg-primary"></span>
                   )}
                   {msg.type === "bot" && (
                     <span className="absolute bottom-0 left-0 w-3 h-3 -ml-1 transform rotate-45 -translate-x-1/2 translate-y-1/2 bg-white border-t border-l border-gray-100"></span>
@@ -144,7 +144,7 @@ const Suggestion = () => {
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                className="w-full px-5 py-3 pr-12 text-sm rounded-full bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-5 py-3 pr-12 text-sm rounded-full bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
                 disabled={isLoading}
               />
               <button
@@ -153,7 +153,7 @@ const Suggestion = () => {
                 className={`absolute right-2 top-1/2 transform -translate-y-1/2 p-2 rounded-full ${
                   isLoading || !message.trim()
                     ? "text-gray-400"
-                    : "text-blue-600 hover:bg-blue-50"
+                    : "text-primary hover:bg-yellow-50"
                 }`}
               >
                 <svg

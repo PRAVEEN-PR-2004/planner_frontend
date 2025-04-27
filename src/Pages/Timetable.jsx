@@ -248,13 +248,14 @@ const Timetable = () => {
             >
               <button
                 onClick={() => setShowReviewCard(false)}
-                className="absolute p-1 text-blue-400 rounded-full top-2 right-2 hover:bg-blue-100"
+                className="absolute p-1 text-yellow-200 rounded-full top-2 right-2 hover:bg-blue-100"
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="w-5 h-5"
                   viewBox="0 0 20 20"
                   fill="currentColor"
+                  s
                 >
                   <path
                     fillRule="evenodd"
@@ -299,7 +300,7 @@ const Timetable = () => {
 
       {isLoading ? (
         <div className="flex items-center justify-center h-64">
-          <div className="w-8 h-8 sm:w-10 sm:h-10 border-[3px] border-blue-500 rounded-full animate-spin border-t-transparent"></div>
+          <div className="w-8 h-8 sm:w-10 sm:h-10 border-[3px] border-primary rounded-full animate-spin border-t-transparent"></div>
         </div>
       ) : (
         <div className="relative p-3 bg-white border rounded-lg shadow-sm sm:p-4 md:p-6 sm:rounded-xl border-slate-200">

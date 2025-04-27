@@ -209,7 +209,7 @@ const CourseCalendar = () => {
 
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col items-center mb-8">
-          <div className="flex items-center justify-center w-16 h-16 mb-4 bg-yellow-100 rounded-full text-primary">
+          <div className="flex items-center justify-center w-16 h-16 mb-4 rounded-full bg-yellow-50 text-primary">
             <FaCalendarAlt className="text-2xl" />
           </div>
           <h1 className="text-3xl font-bold text-center text-gray-800 font-display">
