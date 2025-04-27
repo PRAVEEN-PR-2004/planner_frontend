@@ -180,7 +180,7 @@ const Courses = () => {
 
           <button
             onClick={() => navigate("/courses/addcourses")}
-            className="items-center hidden gap-2 px-6 py-3 text-sm font-medium text-white transition-all duration-200 rounded-lg shadow-lg md:inline-flex bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="items-center hidden gap-2 px-6 py-3 text-sm font-medium text-white transition-all duration-200 rounded-lg shadow-lg md:inline-flex bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2"
           >
             <Plus className="w-5 h-5" />
             Add New Course
@@ -191,7 +191,7 @@ const Courses = () => {
         <div className="fixed bottom-8 right-8 lg:hidden">
           <button
             onClick={() => navigate("/courses/addcourses")}
-            className="flex items-center justify-center p-4 text-white rounded-full shadow-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="flex items-center justify-center p-4 text-white rounded-full shadow-xl bg-gradient-to-r from-yellow-400 to-yellow-500 hover:from-yellow-500 hover:to-yellow-600 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2"
           >
             <Plus className="w-6 h-6" />
           </button>
