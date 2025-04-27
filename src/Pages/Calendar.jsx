@@ -159,10 +159,10 @@ const CourseCalendar = () => {
   return (
     <div className="min-h-screen px-4 py-8 pt-16 bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Notification Bell */}
-      <div className="fixed z-50 top-4 right-4">
+      <div className="fixed z-50 top-8 right-4 ">
         <button
           onClick={() => setShowNotification(!showNotification)}
-          className="relative p-3 text-white bg-indigo-600 rounded-full shadow-lg hover:bg-indigo-700 focus:outline-none"
+          className="relative p-3 text-white rounded-full shadow-lg bg-primary hover:bg-yellow-500 focus:outline-none"
         >
           <FaBell className="text-xl" />
           {upcomingDeadlines.length > 0 && (
@@ -174,7 +174,7 @@ const CourseCalendar = () => {
 
         {/* Notification Dropdown */}
         {showNotification && (
-          <div className="absolute right-0 w-64 mt-8 overflow-hidden bg-white rounded-lg shadow-xl top-14">
+          <div className="absolute right-0 w-64 mt-2 overflow-hidden bg-white rounded-lg shadow-xl top-14">
             <div className="p-4 bg-primary">
               <h3 className="font-semibold text-white">Upcoming Deadlines</h3>
             </div>
@@ -198,7 +198,7 @@ const CourseCalendar = () => {
             <div className="p-2 text-center bg-gray-50">
               <button
                 onClick={() => setShowNotification(false)}
-                className="text-sm text-indigo-600 hover:text-indigo-800"
+                className="text-sm text-primary hover:text-yellow-500"
               >
                 Close
               </button>
@@ -209,7 +209,7 @@ const CourseCalendar = () => {
 
       <div className="max-w-6xl mx-auto">
         <div className="flex flex-col items-center mb-8">
-          <div className="flex items-center justify-center w-16 h-16 mb-4 text-indigo-600 bg-indigo-100 rounded-full">
+          <div className="flex items-center justify-center w-16 h-16 mb-4 bg-yellow-100 rounded-full text-primary">
             <FaCalendarAlt className="text-2xl" />
           </div>
           <h1 className="text-3xl font-bold text-center text-gray-800 font-display">
