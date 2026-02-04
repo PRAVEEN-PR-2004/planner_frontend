@@ -14,7 +14,7 @@ const Signup = ({ switchToLogin, closeModal, onSignupSuccess }) => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "https://academic-planner-backend.onrender.com/api/signup",
+        "https://academic-planner-backend-1.onrender.com/api/signup",
         form
       );
 

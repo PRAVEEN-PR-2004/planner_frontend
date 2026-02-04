@@ -14,7 +14,7 @@ const Login = ({ switchToSignup, closeModal, onLoginSuccess }) => {
     setIsLoading(true);
     try {
       const response = await axios.post(
-        "https://academic-planner-backend.onrender.com/api/login",
+        "https://academic-planner-backend-1.onrender.com/api/login",
         {
           email: form.email.trim(),
           password: form.password.trim(),

@@ -23,7 +23,7 @@ const Courses = () => {
       setIsLoading(true);
       try {
         const res = await fetch(
-          "https://academic-planner-backend.onrender.com/courses/myCourses",
+          "https://academic-planner-backend-1.onrender.com/courses/myCourses",
           {
             headers: {
               Authorization: `Bearer ${token}`,
@@ -52,7 +52,7 @@ const Courses = () => {
     const token = localStorage.getItem("token");
     try {
       const res = await fetch(
-        `https://academic-planner-backend.onrender.com/courses/courses/${courseId}`,
+        `https://academic-planner-backend-1.onrender.com/courses/courses/${courseId}`,
         {
           method: "DELETE",
           headers: {
@@ -79,7 +79,7 @@ const Courses = () => {
 
     try {
       const res = await fetch(
-        `https://academic-planner-backend.onrender.com/courses/courses/${courseId}/complete`,
+        `https://academic-planner-backend-1.onrender.com/courses/courses/${courseId}/complete`,
         {
           method: "PATCH",
           headers: {
@@ -112,7 +112,7 @@ const Courses = () => {
     try {
       // First decrease the chapter count
       const decreaseRes = await fetch(
-        `https://academic-planner-backend.onrender.com/courses/courses/${courseId}/decreaseChapter`,
+        `https://academic-planner-backend-1.onrender.com/courses/courses/${courseId}/decreaseChapter`,
         {
           method: "PATCH",
           headers: {
@@ -132,7 +132,7 @@ const Courses = () => {
       if (updatedCourse.pendingChapters === 0) {
         // Automatically mark as completed
         const completeRes = await fetch(
-          `https://academic-planner-backend.onrender.com/courses/courses/${courseId}/complete`,
+          `https://academic-planner-backend-1.onrender.com/courses/courses/${courseId}/complete`,
           {
             method: "PATCH",
             headers: {

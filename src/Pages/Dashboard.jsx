@@ -21,7 +21,7 @@ const Dashboard = () => {
       const token = localStorage.getItem("token");
       try {
         const res = await fetch(
-          "https://academic-planner-backend.onrender.com/courses/myCourses",
+          "https://academic-planner-backend-1.onrender.com/courses/myCourses",
           {
             headers: { Authorization: `Bearer ${token}` },
           }
